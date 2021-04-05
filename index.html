@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <title>Тестовое задание</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script>
+  $(document).ready(function() {
+    $('body').on('click', 'button', function(e){
+        e.preventDefault(); // Блокируем событие по умолчанию
+        
+        var $this       = $(this),
+            information = new Object(); // Объявляем объект для сбора информации
+        
+        // Собираем данные формы
+        information['name']     = $('#name').val();
+        information['email']    = $('#email').val();
+        information['message']  = $('#message').val();
+        
+        if(information['name'] != '' && information['message'] != '' && information['email'] != ''){
+            $.ajax({
+                type: "POST", dataType: "json", url: "save.php", data: {'information':information}, 
+                success: function(){ loadingContent(); }, error: function(){ }, complete: function(){ 
+                    // $('#name').val(''); $('#email').val(''); $('#message').val('');
+                }
+            });
+        } 
+    });
+    
+    // Подгружаем забронированные дни из файла 
+    loadingContent();
+  });
+  
+  function loadingContent(){
+    $('.loading').html('');
+    $.ajax({ 
+        type: "POST", url: "loading.php", dataType: "json", 
+        success: function(data){ 
+            if(data.obj.length > 0){
+                $.each(data.obj, function(index,value){
+                    $style_head = ''; $style_fon = ''; $style_txt = '';
+                    
+                    if((value['id'] % 2) != 0){ $style_head = 'style="background: #4B596C;"'; $style_fon = 'style="background: #E9EEF3;"'; $style_txt = 'style="color: #4B596C;"'; }
+                    else { $style_head = 'style="background: #58AD52;"'; $style_fon = 'style="background: #DEEBDE;"'; $style_txt = 'style="color: #58AD52;"'; }
+                    
+                    $('.loading').append(
+                    '<div class="col-12 col-sm-6 col-md-4 text-wrap text-break" style="min-height: 300px;">'+
+                    '<div class="h-100" '+$style_fon+'>'+
+                    '<div class="p-3 text-center text-white fs-4" '+$style_head+'>'+value['name']+'</div>'+
+                    '<div class="p-3">'+
+                    '<p class="text-center fs-4 fw-bold" '+$style_txt+'>'+value['email']+'</p>'+
+                    '<p class="text-center fs-5" style="color: #6D737B;">'+value['message']+'</p>'+
+                    '</div>'+
+                    '</div>'+
+                    '</div>');
+                });
+            } else { $('.loading').html('<div class="col-12"><p class="text-center fs-5"">Пусто</p></div>'); }
+        }, error: function(){ }, complete: function(){ }
+    });
+  }
+  </script>
+  
+  <style>
+  .form-validation input, 
+  .form-validation textarea { background: #2F3338!important; color: #CACBCB!important; border-color: #737373!important; }
+  .form-validation textarea { resize: none; }
+  .form-validation .form-label { color: #CACBCB; }
+  </style>
+</head>
+<body>
+    <div style="background: #2D3136; padding-bottom: 15px;">
+        <div class="container">
+            <nav class="navbar">
+                <div class="navbar-header">
+                    <div class="row">
+                        <div class="col-12 p-3 fs-4">
+                            <a href="https://honey-hunters.ru/ru/main.html" target="_blank" class="navbar-brand" style="color: white;text-decoration: none;">
+                                <img src="https://honey-hunters.ru/public/img/logo_50.png" />
+                                HoneyHunters
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        
+            <div class="row">
+                <div class="col-12 text-center">
+                    <img src="ContactIcon.png" width="200" />
+                </div>                
+            </div>
+            <br />
+    
+            <form class="row form-validation">
+                <div class="col-12 col-sm-12 col-md-6 has-validation">
+                    <label for="name" class="form-label fs-5 lh-lg">Имя <span class="text-danger">*</span></label>
+                    <input id="name" type="text" class="form-control form-control-lg" value="" required />
+                    <div class="invalid-feedback">
+                    Пожалуйста, введите имя пользователя.
+                    </div>
+                    <label for="email" class="form-label fs-5 lh-lg">E-mail <span class="text-danger">*</span></label>
+                    <input id="email" type="email" class="form-control form-control-lg" value="" required />
+                    <div class="invalid-feedback">
+                    Пожалуйста, введите email пользователя.
+                    </div>
+                </div>
+                
+                <div class="col-12 col-sm-12 col-md-6 has-validation">
+                    <label for="message" class="form-label fs-5 lh-lg">Комментарий <span class="text-danger">*</span></label>
+                    <textarea id="message" class="form-control form-control-lg" style="height: 143px;" required></textarea>
+                    <div class="invalid-feedback">
+                    Пожалуйста, введите комментарий.
+                    </div>
+                </div>
+                
+                <div class="col-12 col-sm-12 col-md-12 text-end p-3">
+                    <button type="submit" class="btn btn-danger btn-lg">Записать</button>
+                </div>
+            </form>
+            <br />
+        </div>
+    </div>
+    
+    <div style="background: #F6F6F7; padding: 15px 0px;">
+        <div class="container px-4">
+            <br />
+            <h1 class="fs-2 text-center fw-bold">Выводим комментарии</h1>
+            <br /><br />
+            <div class="row gx-4 gy-4 loading">
+            
+            </div>
+            <br /><br />
+        </div>
+    </div>
+    
+    <footer style="background: #2D3136; padding: 30px 0px;">
+        <div class="container">
+            <div class="row">
+                <div class="col-10 fs-4">
+                    <a href="https://honey-hunters.ru/ru/main.html" target="_blank" style="color: white;text-decoration: none;">
+                        <img src="https://honey-hunters.ru/public/img/logo_50.png" />
+                        HoneyHunters
+                    </a>
+                </div>
+                <div class="col-1">
+                    <a href="https://vk.com/" target="_blank">
+                    <img src="vkontakte.png" width="50px" />
+                    </a>
+                </div>
+                <div class="col-1">
+                    <a href="https://ru-ru.facebook.com/" target="_blank">
+                    <img src="facebook.png" width="50px" />
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
